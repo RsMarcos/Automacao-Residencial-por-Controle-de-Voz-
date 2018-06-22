@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <wiringPi.h>
+#include "thinger/thinger.h"
+
+#define USER_ID             "USER_ID"
+#define DEVICE_ID           "DEVICE_ID"
+#define DEVICE_CREDENTIAL   "DEVICE_CREDENTIAL"
+thinger_device thing(USER_ID, DEVICE_ID, DEVICE_CREDENTIAL);
+
+const char* holder;
+int main()
+{
+	wiringPiSetup();
+	pinMode(0, OUTPUT);
+	pinMode(1, OUTPUT);
+	pinMode(2, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(4, OUTPUT);
+	pinMode(5, OUTPUT);
+	pinMode(6, OUTPUT);
+	
+	digitalWrite(3, LOW);
+	digitalWrite(0, LOW);
+			 
+	thing["jardim"] << [](pson& in){
+		digitalWrite(1, in ? HIGH : LOW);
+		digitalWrite(4, in ? HIGH : LOW);
+	};	
+	thing["sala"] << [](pson& in){
+		digitalWrite(5, in ? HIGH : LOW);
+	};
+	thing["abajur"] << [](pson& in){
+		digitalWrite(6, in ? HIGH : LOW);
+	};
+	thing["garagem"] << [](pson& in){
+		digitalWrite(2, in ? HIGH : LOW);
+	};
+	thing["portao"] << [](pson& in){
+		holder = in["Message"];	
+			
+		if (std::string(holder) == "true"){
+			
+			digitalWrite(3, HIGH);
+			digitalWrite(0, LOW);
+			delay(2000);
+			digitalWrite(3, LOW);
+		}
+		if (std::string(holder) == "false"){
+			digitalWrite(0, HIGH);
+			digitalWrite(3, LOW);
+			delay(2000);
+			digitalWrite(0, LOW);
+			
+		}
+	};
+	  
+    thing.start();
+     return 0;
+}
